@@ -1,2 +1,10 @@
-# CMU ..
-该项目旨在收集CMU Deep Learning System的相关资料，帮助更好的学习和完成该课程
+# CMU Dysls Lab详解
+
+CMU Dysls Lab详解 主要记录本人对CMU Dysls课程的实验记录. 
+
+## 解决方案
+
+| 实验  | 说明 | 答案 |
+| ----- | ---- | ---- |
+| Lab-0 |      |      |
+|       |      |      |
