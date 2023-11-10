@@ -1,6 +1,10 @@
-# CMU-DL System Lab0 实验记录
+# 深度学习系统从入门到放弃 - CMU-DL System Lab0
 
-[CMU-DL System](https://dlsyscourse.org/assignments)是陈天奇教授的课程，旨在揭示ML系统的核心原理、配合一些高质量的assignment
+[CMU-DL System](https://dlsyscourse.org/assignments)是陈天奇教授的课程，旨在揭示ML系统的核心原理、配合一些高质量的assignment，本文是该系列的第一章节。
+
+立一个flag，会持续更新后续实现。
+
+相关代码放在了github: [danielxing-cmu-system](https://github.com/Daniel-Xing/cmu-dlsys)
 
 # Lab0: 课前自测
 
@@ -24,7 +28,7 @@ tests/
 Makefile
 ```
 
-## Q1: 实现add方法
+## 问题1: 实现add方法
 
 首先需要在 `simple_ml.py` 中实现一个简单的add方法，已给出的骨架如下：
 
@@ -59,8 +63,9 @@ def add(x, y):
 	### END YOUR CODE
 ```
 
-## Q2:  加载Minist数据集
+## 问题2:  加载Minist数据集
 
+根据提示读取数据集
 
 ```python
 import gzip
@@ -97,7 +102,7 @@ def parse_mnist(image_filename, label_filename):
 
 ```
 
-## Q3: 实现SoftMax Loss
+## 问题3: 实现SoftMax Loss
 
 在 `src/simple_ml.py`文件中实现softmax损失（又名交叉熵损失）函数，即 `softmax_loss()`函数。回顾一下（希望这是复习，但我们也会在9月1日的课上讲解），对于可以取值 $y \in \{1,\ldots,k\}$的多类输出，softmax损失函数接受一个向量 $z \in \mathbb{R}^k$作为输入，这个向量包含了对数概率，以及一个真实的类$y \in \{1,\ldots,k\}$，返回定义如下的损失：
 
@@ -125,9 +130,24 @@ def softmax_loss(Z, y):
     Returns:
         Average softmax loss over the sample.
     """
-    # BEGIN YOUR CODE
-    pass
-    # END YOUR CODE
+    # 确保输入的logits Z是浮点数，以便进行exp计算
+    Z = Z.astype(np.float64)
+
+    # 计算log-sum-exp，即对每个样本的logits应用exp，然后按行求和，最后取对数。
+    # 这一步会得到每个样本的log-sum-exp值。
+    log_sum_exp = np.log(np.sum(np.exp(Z), axis=1))
+
+    # 从log-sum-exp中减去每个样本真实类别的logit。
+    # np.arange(y.shape[0])生成一个索引数组，用于选择每个样本的真实类别的logit。
+    correct_logit = Z[np.arange(y.shape[0]), y]
+
+    # 计算每个样本的softmax损失
+    softmax_loss_per_sample = log_sum_exp - correct_logit
+
+    # 计算所有样本的平均softmax损失
+    average_loss = np.mean(softmax_loss_per_sample)
+
+    return average_loss
 ```
 
 ## 问题4：Softmax回归的随机梯度下降
@@ -305,7 +325,7 @@ def nn_epoch(X, y, W1, W2, lr=0.1, batch=100):
         W2 -= lr * grad_W2
 ```
 
-## Q6: 用C++实现Softmax Regression
+## 问题6: 用C++实现Softmax Regression
 
 使用C++重写一遍问题4。由于使用的是原生的C++，因此有很多的代码需要重新写，下面是题目出给出的代码。
 
@@ -467,3 +487,7 @@ void softmax_grad(const std::vector<float>& Z, const std::vector<unsigned char>&
 ![i](../img/lab0/f6.png)
 
 ## 总结
+
+Lab0是主要是用来做自检的，从加载数据、实现loss、实现梯度更新等方面给到了一个很好的入门，相关的提示都非常到位。
+
+但笔者对c++快忘完了，问题6还是做起来比较费劲的😅
