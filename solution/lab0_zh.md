@@ -1,8 +1,6 @@
 # 深度学习系统从入门到放弃 - CMU-DL System Lab0
 
-[CMU-DL System](https://dlsyscourse.org/assignments)是陈天奇教授的课程，旨在揭示ML系统的核心原理、配合一些高质量的assignment，本文是该系列的第一章节。
-
-立一个flag，会持续更新后续实现。
+[CMU-DL System](https://dlsyscourse.org/assignments)是陈天奇教授的课程，旨在揭示ML系统的核心原理、配合一些高质量的assignment。
 
 相关代码放在了github: [danielxing-cmu-system](https://github.com/Daniel-Xing/cmu-dlsys)
 
