@@ -76,14 +76,10 @@ class PowerScalar(TensorOp):
         self.scalar = scalar
 
     def compute(self, a: NDArray) -> NDArray:
-        ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
-        ### END YOUR SOLUTION
+        return numpy.power(a, self.scalar)
 
     def gradient(self, out_grad, node):
-        ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
-        ### END YOUR SOLUTION
+        return out_grad * self.scalar * numpy.power(node, self.scalar - 1)
 
 
 def power_scalar(a, scalar):
@@ -115,14 +111,13 @@ class EWiseDiv(TensorOp):
     """Op to element-wise divide two nodes."""
 
     def compute(self, a, b):
-        ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
-        ### END YOUR SOLUTION
+        return a / b
 
     def gradient(self, out_grad, node):
-        ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
-        ### END YOUR SOLUTION
+        a, b = node  # Assuming 'node' is a tuple containing (a, b)
+        grad_a = out_grad / b
+        grad_b = -out_grad * a / numpy.power(b, 2)
+        return grad_a, grad_b
 
 
 def divide(a, b):
@@ -302,3 +297,7 @@ class ReLU(TensorOp):
 
 def relu(a):
     return ReLU()(a)
+
+
+if __name__ ==  "__main__":
+    print(PowerScalar(2).compute(numpy.array([1, 2, 3])))
