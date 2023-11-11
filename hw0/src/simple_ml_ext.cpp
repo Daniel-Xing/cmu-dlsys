@@ -33,23 +33,31 @@ void softmax_grad(const std::vector<float>& Z, const std::vector<unsigned char>&
                   size_t batch_size, size_t num_classes, std::vector<float>& gradient) {
     std::vector<float> probabilities;
 
-    // Compute softmax probabilities
+    // Compute softmax probabilities for each sample in the batch
     for (size_t i = 0; i < batch_size; ++i) {
+        // Extract the logits for the current sample
         std::vector<float> logits(Z.begin() + i * num_classes, Z.begin() + (i + 1) * num_classes);
+        // Apply softmax to get probabilities
         std::vector<float> probs = softmax(logits);
 
-        // Subtract 1 from the probability of the correct class
+        // Subtract 1 from the probability of the correct class to calculate the gradient
+        // of the loss function for this sample
         probs[y[i]] -= 1;
 
-        // Copy the probabilities back into the gradient vector
+        // Store the computed gradients for this sample back into the gradient vector
         std::copy(probs.begin(), probs.end(), gradient.begin() + i * num_classes);
     }
 
-    // Average the gradient over the batch
+    // Average the gradients over the batch
+    // This step is crucial because it ensures that the scale of our gradient update
+    // does not depend on the batch size. It helps to maintain the stability of the training
+    // process and makes sure that the learning rate is compatible with gradients computed
+    // on different batch sizes.
     for (size_t i = 0; i < gradient.size(); ++i) {
         gradient[i] /= static_cast<float>(batch_size);
     }
 }
+
 
 void dot_product(const float* A, const float* B, float* C, size_t A_rows, size_t A_cols, size_t B_cols) {
     // Initialize C with zeros
