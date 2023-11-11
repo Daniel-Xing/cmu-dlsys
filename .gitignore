@@ -1,5 +1,4 @@
-hw0-main/.idea
-hw0-main/.pytest_cache
-hw0-main/src/__pycache__
-hw0-main/tests/__pycache__
-hw0-main/tests/__pycache__   
+.idea
+.pytest_cache
+**/__pycache__
+*.pyc
