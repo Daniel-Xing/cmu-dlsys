@@ -157,9 +157,10 @@ class Transpose(TensorOp):
 
 
     def gradient(self, out_grad, node):
-        ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
-        ### END YOUR SOLUTION
+        # 使用逆转置顺序执行转置
+        transposed_out_grad = self.compute(out_grad.cached_data)
+
+        return Tensor(transposed_out_grad)
 
 
 def transpose(a, axes=None):
@@ -263,15 +264,39 @@ def summation(a, axes=None):
 
 class MatMul(TensorOp):
     def compute(self, a, b):
-        return a @ b
+        return array_api.matmul(a, b)
+
+    @staticmethod
+    def match_shape(grad, original_shape):
+        """
+        Adjust the shape of gradient to match the original shape of the tensor.
+        If grad has more dimensions than the original, sum along the extra axes.
+        If grad has fewer dimensions, unsqueeze dimensions at the front.
+        """
+        # Sum extra dimensions if grad has more dimensions than original
+        while grad.ndim > len(original_shape):
+            grad = grad.sum(axis=0)
+
+        # Add dimensions of size 1 if grad has fewer dimensions than original
+        while grad.ndim < len(original_shape):
+            grad = np.expand_dims(grad, axis=0)
+
+        return grad
 
     def gradient(self, out_grad, node):
         a, b = node.inputs
 
-        # Use the transpose_value function to handle b's transposition.
-        grad_a = matmul(out_grad, transpose(b))
-        grad_b = matmul(transpose(a), out_grad)
-        return grad_a, grad_b
+        # Compute gradient for a
+        grad_a = self.compute(out_grad.cached_data, transpose(b).cached_data)
+        grad_a = self.match_shape(grad_a, a.shape)
+
+        # Compute gradient for b
+        grad_b = self.compute(transpose(a).cached_data, out_grad.cached_data)
+        grad_b = self.match_shape(grad_b, b.shape)
+
+        return Tensor(grad_a), Tensor(grad_b)
+
+
 
 
 def matmul(a, b):

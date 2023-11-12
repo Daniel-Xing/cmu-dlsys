@@ -464,6 +464,10 @@ def gradient_check(f, *args, tol=1e-6, backward=False, **kwargs):
     error = sum(
         np.linalg.norm(computed_grads[i] - numerical_grads[i]) for i in range(len(args))
     )
+    # # 在这里打印出computed_grads[i]和numerical_grads[i]的形状
+    # for i in range(len(args)):
+    #     print(f"computed_grads[{i}] shape:", computed_grads[i].shape)
+    #     print(f"numerical_grads[{i}] shape:", numerical_grads[i].shape)
     assert error < tol
     return computed_grads
 
@@ -493,35 +497,36 @@ def test_matmul_simple_backward():
     )
 
 
-# def test_matmul_batched_backward():
-#     gradient_check(
-#         ndl.matmul,
-#         ndl.Tensor(np.random.randn(6, 6, 5, 4)),
-#         ndl.Tensor(np.random.randn(6, 6, 4, 3)),
-#     )
-#     gradient_check(
-#         ndl.matmul,
-#         ndl.Tensor(np.random.randn(6, 6, 5, 4)),
-#         ndl.Tensor(np.random.randn(4, 3)),
-#     )
-#     gradient_check(
-#         ndl.matmul,
-#         ndl.Tensor(np.random.randn(5, 4)),
-#         ndl.Tensor(np.random.randn(6, 6, 4, 3)),
-#     )
+def test_matmul_batched_backward():
+    gradient_check(
+        ndl.matmul,
+        ndl.Tensor(np.random.randn(6, 6, 5, 4)),
+        ndl.Tensor(np.random.randn(6, 6, 4, 3)),
+    )
+    gradient_check(
+        ndl.matmul,
+        ndl.Tensor(np.random.randn(5, 4)),
+        ndl.Tensor(np.random.randn(6, 6, 4, 3)),
+    )
+    gradient_check(
+        ndl.matmul,
+        ndl.Tensor(np.random.randn(6, 6, 5, 4)),
+        ndl.Tensor(np.random.randn(4, 3)),
+    )
+    
 
 
-# def test_reshape_backward():
-#     gradient_check(ndl.reshape, ndl.Tensor(np.random.randn(5, 4)), shape=(4, 5))
+def test_reshape_backward():
+    gradient_check(ndl.reshape, ndl.Tensor(np.random.randn(5, 4)), shape=(4, 5))
 
 
-# def test_negate_backward():
-#     gradient_check(ndl.negate, ndl.Tensor(np.random.randn(5, 4)))
+def test_negate_backward():
+    gradient_check(ndl.negate, ndl.Tensor(np.random.randn(5, 4)))
 
 
-# def test_transpose_backward():
-#     gradient_check(ndl.transpose, ndl.Tensor(np.random.randn(3, 5, 4)), axes=(1, 2))
-#     gradient_check(ndl.transpose, ndl.Tensor(np.random.randn(3, 5, 4)), axes=(0, 1))
+def test_transpose_backward():
+    gradient_check(ndl.transpose, ndl.Tensor(np.random.randn(3, 5, 4)), axes=(1, 2))
+    gradient_check(ndl.transpose, ndl.Tensor(np.random.randn(3, 5, 4)), axes=(0, 1))
 
 
 def test_broadcast_to_backward():
