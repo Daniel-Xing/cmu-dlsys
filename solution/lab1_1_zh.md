@@ -264,19 +264,19 @@ def compute(self, a):
 
 ### 梯度计算方法
 
-对于 `EWiseAdd` 操作，给定的输出梯度（`out_grad`）直接就是该操作对于每个输入张量的梯度。换句话说，如果我们有一个标量函数 \( L \) 是最终的损失函数，`a` 和 `b` 是 `EWiseAdd` 操作的输入，那么根据链式法则：
+对于 `EWiseAdd` 操作，给定的输出梯度（`out_grad`）直接就是该操作对于每个输入张量的梯度。换句话说，如果我们有一个标量函数 $ L $ 是最终的损失函数，`a` 和 `b` 是 `EWiseAdd` 操作的输入，那么根据链式法则：
 
 $$
 \frac{\partial L}{\partial a} = \frac{\partial L}{\partial (a+b)} \cdot \frac{\partial (a+b)}{\partial a}
 $$
 
-因为 \( a + b \) 相对于 \( a \) 的导数是 1，我们可以简化为：
+因为 $ a + b $ 相对于 $ a $ 的导数是 1，我们可以简化为：
 
 $$
 \frac{\partial L}{\partial a} = \frac{\partial L}{\partial (a+b)}
 $$
 
-同理，对 \( b \) 也是如此：
+同理，对 $ b $ 也是如此：
 
 $$
 \frac{\partial L}{\partial b} = \frac{\partial L}{\partial (a+b)}
@@ -301,7 +301,7 @@ class EWiseAdd(TensorOp):
 
 ## PowerScalar
 
-`PowerScalar` 算子接收一个整数标量 `scalar` 并将输入张量 `a` 的每个元素 \( a_i \) 乘以自身 `scalar` 次。其数学表达式为：
+`PowerScalar` 算子接收一个整数标量 `scalar` 并将输入张量 `a` 的每个元素 $ a_i $ 乘以自身 `scalar` 次。其数学表达式为：
 
 $$
 a_i^{scalar}
@@ -309,19 +309,19 @@ $$
 
 ### 梯度计算
 
-当我们需要对 `PowerScalar` 算子进行反向传播时，我们要计算关于输入 `a` 的梯度。根据链式法则，如果有一个标量函数 \( L \) 是最终的损失函数，那么 `a` 的梯度是：
+当我们需要对 `PowerScalar` 算子进行反向传播时，我们要计算关于输入 `a` 的梯度。根据链式法则，如果有一个标量函数 $ L $ 是最终的损失函数，那么 `a` 的梯度是：
 
 $$
 \frac{\partial L}{\partial a_i} = \frac{\partial L}{\partial (a_i^{scalar})} \cdot \frac{\partial (a_i^{scalar})}{\partial a_i}
 $$
 
-给定 \( a_i^{scalar} \) 相对于 \( a_i \) 的导数是 \( scalar \cdot a_i^{scalar - 1} \)，我们可以进一步展开上述表达式：
+给定 $ a_i^{scalar} $ 相对于 $ a_i $ 的导数是 $ scalar \cdot a_i^{scalar - 1} $，我们可以进一步展开上述表达式：
 
 $$
 \frac{\partial L}{\partial a_i} = \frac{\partial L}{\partial (a_i^{scalar})} \cdot scalar \cdot a_i^{scalar - 1}
 $$
 
-这意味着输入张量 `a` 中每个元素 \( a_i \) 的梯度是由外部传递的梯度（即 \( \frac{\partial L}{\partial (a_i^{scalar})} \)）乘以 `scalar` 再乘以 \( a_i \) 的 `scalar - 1` 次幂。
+这意味着输入张量 `a` 中每个元素 $ a_i $ 的梯度是由外部传递的梯度（即 $ \frac{\partial L}{\partial (a_i^{scalar})} $）乘以 `scalar` 再乘以 $ a_i $ 的 `scalar - 1` 次幂。
 
 ### 代码实现
 
@@ -349,13 +349,13 @@ $$
 c_i = \frac{a_i}{b_i}
 $$
 
-其中 $c_i $ 是结果张量中的第 \( i \) 个元素。
+其中 $c_i $ 是结果张量中的第 $ i $ 个元素。
 
 ### 梯度计算
 
-为了在神经网络中反向传播误差，我们需要计算 `EWiseDiv` 操作相对于其两个输入的梯度。根据链式法则，如果有一个标量函数 \( L \) 是最终的损失函数，那么关于 `a` 和 `b` 的梯度分别是：
+为了在神经网络中反向传播误差，我们需要计算 `EWiseDiv` 操作相对于其两个输入的梯度。根据链式法则，如果有一个标量函数 $ L $ 是最终的损失函数，那么关于 `a` 和 `b` 的梯度分别是：
 
-对于 \( a \)：
+对于 $ a $：
 
 $$
 \frac{\partial L}{\partial a_i} = \frac{\partial L}{\partial c_i} \cdot \frac{\partial c_i}{\partial a_i}
@@ -367,7 +367,7 @@ $$
 \frac{\partial L}{\partial a_i} = \frac{\partial L}{\partial c_i} \cdot \frac{1}{b_i}
 $$
 
-对于 \( b \)：
+对于 $ b $：
 
 $$
 \frac{\partial L}{\partial b_i} = \frac{\partial L}{\partial c_i} \cdot \frac{\partial c_i}{\partial b_i}
@@ -406,11 +406,11 @@ $$
 c_i = \frac{a_i}{scalar}
 $$
 
-其中 $ c_i $ 是结果张量中的第 \( i \) 个元素。
+其中 $ c_i $ 是结果张量中的第 $ i $ 个元素。
 
 ### 梯度计算
 
-对于 `DivScalar` 算子，我们需要计算它相对于输入张量 `a` 的梯度。根据链式法则，如果有一个标量函数 \( L \) 代表最终的损失函数，那么对于输入张量 `a` 中的每个元素 $a_i $ 的梯度是：
+对于 `DivScalar` 算子，我们需要计算它相对于输入张量 `a` 的梯度。根据链式法则，如果有一个标量函数 $ L $ 代表最终的损失函数，那么对于输入张量 `a` 中的每个元素 $a_i $ 的梯度是：
 
 $$
 \frac{\partial L}{\partial a_i} = \frac{\partial L}{\partial c_i} \cdot \frac{\partial c_i}{\partial a_i}
@@ -442,31 +442,31 @@ class DivScalar(TensorOp):
 
 在神经网络中，矩阵乘法是一个基础且常用的运算，用于层之间的线性变换。`MatMul` 算子实现了两个张量的矩阵乘法。对于梯度的计算，特别是当涉及到批处理和不同维度的张量时，需要特别处理以保证梯度的形状与原张量匹配。
 
-`MatMul` 算子实现了两个张量 `a` 和 `b` 的矩阵乘法。如果张量 `a` 的形状是 \( m \times n \) 而张量 `b` 的形状是 \( n \times p \)，那么结果张量的形状将是 \( m \times p \)。其数学表达式为：
+`MatMul` 算子实现了两个张量 `a` 和 `b` 的矩阵乘法。如果张量 `a` 的形状是 $ m \times n $ 而张量 `b` 的形状是 $ n \times p $，那么结果张量的形状将是 $ m \times p $。其数学表达式为：
 
 $$
 C = AB
 $$
 
-其中 \( C \) 是结果矩阵，\( A \) 是左矩阵，\( B \) 是右矩阵。
+其中 $ C $ 是结果矩阵，$ A $ 是左矩阵，$ B $ 是右矩阵。
 
 ### 梯度计算
 
-假设有一个标量函数 \( L \) 表示损失函数，我们需要计算 `MatMul` 操作相对于其输入 `a` 和 `b` 的梯度。利用链式法则，我们有：
+假设有一个标量函数 $ L $ 表示损失函数，我们需要计算 `MatMul` 操作相对于其输入 `a` 和 `b` 的梯度。利用链式法则，我们有：
 
-对于 \( A \) 的梯度：
+对于 $ A $ 的梯度：
 
 $$
 \frac{\partial L}{\partial A} = \frac{\partial L}{\partial C} \cdot B^T
 $$
 
-对于 \( B \) 的梯度：
+对于 $ B $ 的梯度：
 
 $$
 \frac{\partial L}{\partial B} = A^T \cdot \frac{\partial L}{\partial C}
 $$
 
-其中 \( B^T \) 和 \( A^T \) 分别表示 \( B \) 和 \( A \) 的转置。
+其中 $ B^T $ 和 $ A^T $ 分别表示 $ B $ 和 $ A $ 的转置。
 
 ### 代码实现
 
@@ -516,7 +516,7 @@ $$
 S_{j_1, \ldots, j_m} = \sum_{k} a_{j_1, \ldots, j_{m-1}, k, j_{m+1}, \ldots}
 $$
 
-其中 \( j_1, \ldots, j_m \) 是非求和轴上的索引，\( k \) 是求和轴上的索引。
+其中 $ j_1, \ldots, j_m $ 是非求和轴上的索引，$ k $ 是求和轴上的索引。
 
 ### 梯度计算
 
@@ -535,7 +535,7 @@ broadcast(out\_grad), & \text{if sum over certain axes}
 \end{cases}
 $$
 
-其中 \( L \) 是损失函数。
+其中 $ L $ 是损失函数。
 
 ### 代码实现
 
@@ -566,7 +566,7 @@ class Summation(TensorOp):
 
 ## BroadcastTo
 
-`BroadcastTo` 算子将输入张量 `a` 扩展到给定的形状 `shape`。在数学上，对于张量 `a` 的每个元素 \( a_{i_1, \ldots, i_n} \)，如果在给定维度上进行了广播，则该维度上所有的元素值将与 \( a_{i_1, \ldots, i_n} \) 相同。
+`BroadcastTo` 算子将输入张量 `a` 扩展到给定的形状 `shape`。在数学上，对于张量 `a` 的每个元素 $ a_{i_1, \ldots, i_n} $，如果在给定维度上进行了广播，则该维度上所有的元素值将与 $ a_{i_1, \ldots, i_n} $ 相同。
 
 ### 梯度计算
 
@@ -578,7 +578,7 @@ $$
 \frac{\partial L}{\partial a_{i_1, \ldots, i_n}} = \sum_{j_1, \ldots, j_m} \frac{\partial L}{\partial c_{j_1, \ldots, j_m}}
 $$
 
-其中 \( \frac{\partial L}{\partial c_{j_1, \ldots, j_m}} \) 表示广播后张量的梯度，\( \{j_1, \ldots, j_m\} \) 是广播操作中复制 \( a_{i_1, \ldots, i_n} \) 的索引集合。
+其中 $ \frac{\partial L}{\partial c_{j_1, \ldots, j_m}} $ 表示广播后张量的梯度，$ \{j_1, \ldots, j_m\} $ 是广播操作中复制 $ a_{i_1, \ldots, i_n} $ 的索引集合。
 
 ### 代码实现
 
@@ -614,7 +614,7 @@ class BroadcastTo(TensorOp):
 
 ## Reshape
 
-`Reshape` 算子允许我们改变张量的形状而不改变其包含的数据和数据顺序。假设我们有一个形状为 \( m \times n \) 的张量，我们可以将其重新塑形为形状为 \( p \times q \) 的新张量，只要 \( m \times n = p \times q \)。
+`Reshape` 算子允许我们改变张量的形状而不改变其包含的数据和数据顺序。假设我们有一个形状为 $ m \times n $ 的张量，我们可以将其重新塑形为形状为 $ p \times q $ 的新张量，只要 $ m \times n = p \times q $。
 
 ### 梯度计算
 
@@ -628,7 +628,7 @@ $$
 \text{那么} \quad \frac{\partial L}{\partial a} \quad \text{可以通过将} \quad \frac{\partial L}{\partial b} \quad \text{重塑为} \quad m \times n \quad \text{的形状来得到}
 $$
 
-其中 \( L \) 是损失函数。
+其中 $ L $ 是损失函数。
 
 ### 代码实现
 
@@ -652,23 +652,23 @@ class Reshape(TensorOp):
 
 ## Negate
 
-`Negate` 算子将输入张量 `a` 中的每个元素取反。如果输入张量 `a` 中的元素为 \( a_i \)，那么经过 `Negate` 算子处理后的元素为 \( -a_i \)。其数学表达式为：
+`Negate` 算子将输入张量 `a` 中的每个元素取反。如果输入张量 `a` 中的元素为 $ a_i $，那么经过 `Negate` 算子处理后的元素为 $ -a_i $。其数学表达式为：
 
 $$
 c_i = -a_i
 $$
 
-其中 \( c_i \) 是结果张量中的第 \( i \) 个元素。
+其中 $ c_i $ 是结果张量中的第 $ i $ 个元素。
 
 ### 梯度计算
 
-对于 `Negate` 算子，我们需要计算它相对于输入张量 `a` 的梯度。根据链式法则，如果有一个标量函数 \( L \) 代表最终的损失函数，那么对于输入张量 `a` 的梯度是：
+对于 `Negate` 算子，我们需要计算它相对于输入张量 `a` 的梯度。根据链式法则，如果有一个标量函数 $ L $ 代表最终的损失函数，那么对于输入张量 `a` 的梯度是：
 
 $$
 \frac{\partial L}{\partial a_i} = \frac{\partial L}{\partial c_i} \cdot \frac{\partial c_i}{\partial a_i}
 $$
 
-由于 \( c_i \) 相对于 \( a_i \) 的导数是 -1，我们得到：
+由于 $ c_i $ 相对于 $ a_i $ 的导数是 -1，我们得到：
 
 $$
 \frac{\partial L}{\partial a_i} = -\frac{\partial L}{\partial c_i}
@@ -695,9 +695,9 @@ class Negate(TensorOp):
 
 ### 梯度计算
 
-对于转置操作，梯度的计算相对直观。梯度必须根据转置操作逆转回去，这样每个元素的梯度才会回到原始的位置。如果我们将一个形状为 \( m \times n \) 的张量进行转置，得到一个形状为 \( n \times m \) 的新张量，那么梯度也会从 \( n \times m \) 转置回 \( m \times n \)。
+对于转置操作，梯度的计算相对直观。梯度必须根据转置操作逆转回去，这样每个元素的梯度才会回到原始的位置。如果我们将一个形状为 $ m \times n $ 的张量进行转置，得到一个形状为 $ n \times m $ 的新张量，那么梯度也会从 $ n \times m $ 转置回 $ m \times n $。
 
-数学上，如果转置操作由一个置换矩阵 \( P \) 表示，使得 \( B = PA \)，那么 \( A \) 相对于 \( B \) 的梯度 $ \frac{\partial L}{\partial A} $可以通过 \( P^T \frac{\partial L}{\partial B} \) 得到，其中 \( L \) 是损失函数。
+数学上，如果转置操作由一个置换矩阵 $ P $ 表示，使得 $ B = PA $，那么 $ A $ 相对于 $ B $ 的梯度 $ \frac{\partial L}{\partial A} $可以通过 $ P^T \frac{\partial L}{\partial B} $ 得到，其中 $ L $ 是损失函数。
 
 ### 代码实现
 

@@ -1,16 +1,18 @@
-# 深度学习系统从入门到放弃 - CMU-DL System Lab0
+# Deep learning system from entry to abandonment - CMU-DL System Lab0
 
-[CMU-DL System](https://dlsyscourse.org/assignments)是陈天奇教授的课程，旨在揭示ML系统的核心原理、配合一些高质量的assignment。
+> Open a new pit, open a new pit
 
-相关代码放在了github: [danielxing-cmu-system](https://github.com/Daniel-Xing/cmu-dlsys)
+[CMU-DL System ](https://dlsyscourse.org/assignments)is a course taught by Chen Tianqi, which aims to reveal the core principles of ML systems and cooperate with some high-quality assignments. If you study a complete course, you will have a more comprehensive understanding of the basic principles of pytorch and tensorflow. Wouldn't it be fulfilling to complete the assignment?
 
-# Lab0: 课前自测
+The relevant code is on GitHub: [danielxing-cmu-system](https://github.com/Daniel-Xing/cmu-dlsys)
 
-Lab0 给出了一些测试题目，这些测试题目有助于学习者衡量自己的背景是否能够满足完成这些课程的前置条件。
+# Lab0: Self-test before class
 
-首先需要去Github上克隆Lab0，地址是：
+Lab0 provides some test questions that help learners evaluate whether their background meets the prerequisites for completing these courses.
 
-克隆完成后我们可以看到主要的目录结构为：
+First, you need to go to Github to clone Lab0. The address is:
+
+After the cloning is complete, we can see that the main directory structure is:
 
 ```Bash
 data/
@@ -26,9 +28,9 @@ tests/
 Makefile
 ```
 
-## 问题1: 实现add方法
+## Problem 1: Implementing the add method
 
-首先需要在 `simple_ml.py` 中实现一个简单的add方法，已给出的骨架如下：
+First, you need to implement a simple add method in your `simple_ml.py`. The skeleton given is as follows:
 
 ```python
 def add(x, y):
@@ -48,7 +50,7 @@ def add(x, y):
     ### END YOUR CODE
 ```
 
-实现非常简单，直接相加就可以了
+The implementation is very simple, just add it directly.
 
 ```Python
 def add(x, y):
@@ -61,9 +63,9 @@ def add(x, y):
 	### END YOUR CODE
 ```
 
-## 问题2:  加载Minist数据集
+## Problem 2: Loading the Minist dataset
 
-根据提示读取数据集
+Read the dataset according to the prompts
 
 ```python
 import gzip
@@ -100,17 +102,17 @@ def parse_mnist(image_filename, label_filename):
 
 ```
 
-## 问题3: 实现SoftMax Loss
+## Problem 3: Implementing SoftMax Loss
 
-在 `src/simple_ml.py`文件中实现softmax损失（又名交叉熵损失）函数，即 `softmax_loss()`函数。回顾一下（希望这是复习，但我们也会在9月1日的课上讲解），对于可以取值 $y \in \{1,\ldots,k\}$的多类输出，softmax损失函数接受一个向量 $z \in \mathbb{R}^k$作为输入，这个向量包含了对数概率，以及一个真实的类$y \in \{1,\ldots,k\}$，返回定义如下的损失：
+Implement the softmax loss (aka cross entropy loss) function in the `src/simple_ml.py`file, the `softmax_loss()`function. To recap (hopefully this is a refresher, but we will also cover it in the September 1st class), for multi-class outputs that can take the value $y \in \{1,\ldots,k\}$, the softmax loss function accepts a vector $z \in \mathbb{R}^k$As input, this vector contains the logarithmic probability, and a real class $y \in \{1,\ldots,k\}$, and returns the loss defined as follows:
 
 $$
 \ell_{\mathrm{softmax}}(z, y) = \log\sum_{i=1}^k \exp z_i - z_y.
 $$
 
-请注意，正如其文档字符串中所描述的，`softmax_loss()`接受一个_二维数组_的logits（即，一个批次中不同样本的 $ k $ 维logits），以及一个相应的一维数组的真实标签，应该输出整个批次的_softmax损失的平均值_。请注意，为了正确执行这一计算，你应该_不使用任何循环_，而是完全使用numpy的向量化操作（为了设定期望值，我们应该注意到我们的参考解决方案由一行代码组成）。
+Note that, as described in its documentation string, `softmax_loss()`takes a _ two-dimensional array _ logits (i.e., the (k) -dimensional logits of different samples in a batch), and a corresponding one-dimensional array's real label, should output the average _ of the _softmax loss for the entire batch. Note that in order to perform this calculation correctly, you should _ not use any looping _, but use numpy's vectorization operation entirely (to set the expected value, we should note that our reference solution consists of one line of code).
 
-请注意，对于“真实”的softmax损失实现，你会希望对logits进行缩放以防止数值溢出，但在这里我们不需要担心这个问题（即使你不考虑这个问题，剩余的作业也能正常工作）。下面的代码运行测试用例。
+Note that for a "real" softmax loss implementation, you'll want to scale the logits to prevent numeric overflow, but here we don't need to worry about that (even if you don't think about it, the rest of the job will work fine). The following code runs the test case.
 
 ```Python
 def softmax_loss(Z, y):
@@ -148,50 +150,50 @@ def softmax_loss(Z, y):
     return average_loss
 ```
 
-## 问题4：Softmax回归的随机梯度下降
+## Problem 4: Random layer descent for Softmax regression
 
-在这个问题中，您将为(线性)Softmax回归实现随机梯度下降（SGD）。换句话说，正如我们在9月1日的课上讨论的，我们将考虑一个假设函数，它通过下面的函数将$n$维输入转换为$k$维的对数几率（logits）：
+In this problem, you will implement random layer descent (SGD) for (linear) Softmax regression. In other words, as we discussed in our September 1 class, we will consider a hypothesis function that converts $n$-dimensional inputs to $k$-dimensional logits (logits) by the following function:
 
 $$
 h(x) = \Theta^T x
 $$
 
-其中 $x \in \mathbb{R}^n$ 是输入，而 $\Theta \in \mathbb{R}^{n \times k}$ 是模型参数。给定一个数据集 $\{(x^{(i)} \in \mathbb{R}^n, y^{(i)} \in \{1,\ldots,k\})\}$，对于 $i=1,\ldots,m$，与Softmax回归相关的优化问题由下面给出：
+Where $x \in \mathbb{R}^n$is the input and $\Theta \in \mathbb{R}^{n \times k}$is the model parameter. Given a dataset $\{(x^{(i)} \in \mathbb{R}^n, y^{(i)} \in \{1,\ldots,k\})\}$, for $i=1,\ldots,m$, the optimization problem associated with Softmax regression is given by:
 
 $$
 \DeclareMathOperator*{\minimize}{minimize}
 \minimize_{\Theta} \; \frac{1}{m} \sum_{i=1}^m \ell_{\mathrm{softmax}}(\Theta^T x^{(i)}, y^{(i)}).
 $$
 
-回想一下课堂上的内容，线性Softmax目标的梯度由下面给出：
+Recall from the class that the layer of the linear Softmax target is given as follows:
 
 $$
 \nabla_\Theta \ell_{\mathrm{softmax}}(\Theta^T x, y) = x (z - e_y)^T
 $$
 
-其中
+among them
 
 $$
 z = \frac{\exp(\Theta^T x)}{1^T \exp(\Theta^T x)} \equiv \text{normalize}(\exp(\Theta^T x))
 $$
 
-（即，$z$只是归一化的Softmax概率），并且$e_y$表示第$y$个单位基，也就是，在第$y$个位置是1，其他位置都是0的向量。
+(That is, $z$is just the normalized Softmax probability), and $e_y$represents the $y$-th unit basis, that is, a vector that is 1 at the $y$-th position and 0 at all other positions.
 
-我们也可以用我们在课堂上讨论过的更紧凑的表示法来表达这一点。也就是说，如果我们让$X \in \mathbb{R}^{m \times n}$表示某$m$个输入的设计矩阵（不论是整个数据集还是一个小批次），$y \in \{1,\ldots,k\}^m$对应的标签向量，以及重载$\ell_{\mathrm{softmax}}$来指代平均Softmax损失，那么
+We can also express this in the more compact notation we discussed in class. That is, if we let $X \in \mathbb{R}^{m \times n}$represent the design matrix of some $m$inputs (whether an entire dataset or a small batch), $y \in \{1,\ldots,k\}^m$corresponding label vector, and overload $\ell_{\mathrm{softmax}}$to refer to the average Softmax loss, then
 
 $$
 \nabla_\Theta \ell_{\mathrm{softmax}}(X \Theta, y) = \frac{1}{m} X^T (Z - I_y)
 $$
 
-其中
+among them
 
 $$
 Z = \text{normalize}(\exp(X \Theta)) \quad \text{（归一化应用于逐行）}
 $$
 
-表示对数几率矩阵，而$I_y \in \mathbb{R}^{m \times k}$代表$y$中标签的独热编码的合并。
+Represents a logarithmic probability matrix, and $I_y \in \mathbb{R}^{m \times k}$represents the merging of one-hot encodings of labels in $y$.
 
-使用这些梯度，实现 `softmax_regression_epoch()`函数，该函数使用指定的学习率/步长 `lr`和小批次大小 `batch`运行SGD的单个周期（一次数据集的传递）。如文档字符串所描述的，您的函数应该就地修改 `Theta`数组。实现后，运行测试。
+Using these layers, implement the `softmax_regression_epoch()`function that runs the SGD for a single cycle (one pass of the dataset) with the specified learning rate/step `lr`and small batch size `batch`. As described in the documentation string, your function should modify the `Theta`array in place. Once implemented, run the test.
 
 ```Python
 def softmax_regression_epoch(X, y, theta, lr=0.1, batch=100):
@@ -228,27 +230,27 @@ def softmax_regression_epoch(X, y, theta, lr=0.1, batch=100):
         theta -= lr * np.dot(X_batch.T, grad)
 ```
 
-## 问题 5: 两层神经网络的随机梯度下降（SGD）
+## Problem 5: Random layer descent (SGD) in two-layer neural networks
 
-既然您已经为线性分类器编写了随机梯度下降（SGD），现在让我们考虑一个简单的两层神经网络的情况。具体来说，对于输入 $ x \in \mathbb{R}^n $，我们将考虑一个没有偏置项的两层神经网络，形式如下：
+Now that you've written random layer descent (SGD) for a linear classifier, let's consider the case of a simple two-layer neural network. Specifically, for the input (x\ in\ mathbb {R} ^ n), we'll consider a two-layer neural network without a bias term of the form:
 
 $$
 z = W_2^T \mathrm{ReLU}(W_1^T x)
 $$
 
-这里 $ W_1 \in \mathbb{R}^{n \times d} $ 和 $ W_2 \in \mathbb{R}^{d \times k} $ 表示网络的权重（网络具有一个 $ d $ 维的隐藏单元），而 $ z \in \mathbb{R}^k $ 表示网络输出的logits。我们再次使用softmax/交叉熵损失，意味着我们想要解决以下优化问题：
+Here (W_1\ in\ mathbb {R} ^ {n\ times d}) and (W_2\ in\ mathbb {R} ^ {d\ times k}) represent the weights of the network (the network has a hidden unit of (d) dimension), and (z\ in\ mathbb {R} ^ k) represent the logits output by the network. Again, we use softmax/cross entropy loss, which means we want to solve the following optimization problem:
 
 $$
 \minimize_{W_1, W_2} \;\; \frac{1}{m} \sum_{i=1}^m \ell_{\mathrm{softmax}}(W_2^T \mathrm{ReLU}(W_1^T x^{(i)}), y^{(i)}).
 $$
 
-或者，使用矩阵 $ X \in \mathbb{R}^{m \times n} $ 来描述批量形式的情况，也可以写成：
+Or, using the matrix (X\ in\ mathbb {R} ^ {m\ times n}) to describe the case in batch form, it can also be written as:
 
 $$
 \minimize_{W_1, W_2} \;\; \ell_{\mathrm{softmax}}(\mathrm{ReLU}(X W_1) W_2, y).
 $$
 
-使用链式法则，我们可以推导出这个网络的反向传播更新（我们将在9/8的课上简要介绍，但为了便于实现，这里也提供了最终形式）。具体来说，设：
+Using the chain rule, we can derive backpropagation updates to this network (which we will briefly cover in class 9/8, but the final form is also provided here for ease of implementation). Specifically, let:
 
 $$
 \begin{split}
@@ -258,7 +260,7 @@ G_1 \in \mathbb{R}^{m \times d} & = \mathrm{1}\{Z_1 > 0\} \circ (G_2 W_2^T)
 \end{split}
 $$
 
-这里 $ \mathrm{1}\{Z_1 > 0\} $ 是一个二元矩阵，其元素等于零或一，这取决于 $ Z_1 $ 中的每一项是否严格为正，且 $ \circ $ 表示按元素乘法。那么目标的梯度由下式给出：
+Here (\ mathrm {1} {Z_1 > 0}) is a binary matrix with elements equal to zero or one, depending on whether each term in (Z_1) is strictly positive, and (\ circ) represents multiplication by elements. Then the layer of the target is given by:
 
 $$
 \begin{split}
@@ -267,9 +269,9 @@ $$
 \end{split}
 $$
 
-使用这些梯度，现在编写 `src/simple_ml.py` 文件中的 `nn_epoch()` 函数。与前一个问题一样，您的解决方案应该就地修改 `W1` 和 `W2` 数组。实现函数后，运行以下测试。请务必使用上述表达式所指示的矩阵操作来实现函数：这将比尝试使用循环_快得多_，而且效率更高（而且需要的代码远远少）。
+Using these layers, now write the `nn_epoch()`function in the `src/simple_ml.py`file. As with the previous problem, your solution should modify the `W1`and `W2`arrays in place. After implementing the function, run the following test. Be sure to implement the function using the matrix operation indicated by the above expression: This will be much faster _ than trying to use a loop _, and more efficient (and requires far less code).
 
-在上述的课程描述中，已经非常完备的给出了对应的公式，对照着进行实现即可。
+In the above course description, the corresponding formula has been given very fully, and it can be implemented in comparison.
 
 ```Python
 def nn_epoch(X, y, W1, W2, lr=0.1, batch=100):
@@ -323,9 +325,9 @@ def nn_epoch(X, y, W1, W2, lr=0.1, batch=100):
         W2 -= lr * grad_W2
 ```
 
-## 问题6: 用C++实现Softmax Regression
+## Problem 6: Implementing Softmax Regression with C++
 
-使用C++重写一遍问题4。由于使用的是原生的C++，因此有很多的代码需要重新写，下面是题目出给出的代码。
+Use C++ to rewrite question 4. Since the native C++ is used, there is a lot of code that needs to be rewritten. Here is the code given in the title.
 
 ```cpp
 void softmax_regression_epoch_cpp(const float *X, const unsigned char *y, 
@@ -360,13 +362,13 @@ void softmax_regression_epoch_cpp(const float *X, const unsigned char *y,
 }
 ```
 
-根据问题四的思路，主要步骤分为三步：
+According to the thinking behind question 4, the main steps are divided into three steps:
 
-1. 根据小批量，计算得到logits
-2. 计算梯度
-3. 根据梯度更新参数
+1. According to the small batch, the logits are calculated.
+2. Compute layer
+3. Update parameters according to layer
 
-因此我们应该可以写出如下代码框架
+Therefore, we should be able to write the following code framework
 
 ```cpp
 // 定义softmax回归训练迭代的函数
@@ -419,7 +421,7 @@ void softmax_regression_epoch_cpp(const float *X, const unsigned char *y,
 
 ```
 
-这个时候只需要完成两个函数dot_product、softmax_grad这两个函数的实现即可。下面给出参考的实现：
+At this time, only two functions need to be completed dot_product and softmax_grad the implementation of these two functions. The reference implementation is given below:
 
 ```cpp
 void dot_product(const float* A, const float* B, float* C, size_t A_rows, size_t A_cols, size_t B_cols) {
@@ -480,12 +482,12 @@ void softmax_grad(const std::vector<float>& Z, const std::vector<unsigned char>&
 }
 ```
 
-最后运行测试函数
+Finally, run the test function
 
-![i](../img/lab0/f6.png)
+![F6.png](https://p0-bytetech-private.bytetech.info/tos-cn-i-93o7bpds8j/1424e4b589564634b384339c1b77db8d~tplv-93o7bpds8j-compressed.awebp?policy=eyJ2bSI6MiwiY2siOiJieXRldGVjaCJ9&rk3s=5aaa0ea2&x-orig-authkey=f32326d3454f2ac7e96d3d06cdbb035152127018&x-orig-expires=1700029061&x-orig-sign=EVE9FicCIybDR3iLMLWPaLWHZ3o%3D)
 
-## 总结
+## summary
 
-Lab0是主要是用来做自检的，从加载数据、实现loss、实现梯度更新等方面给到了一个很好的入门，相关的提示都非常到位。
+Lab0 is mainly used for self-inspection, and it gives a good introduction from loading data, implementing loss, and implementing layer updates. The relevant tips are all in place.
 
-但笔者对c++快忘完了，问题6还是做起来比较费劲的😅
+But the author almost forgot about c ++, problem 6 is still more laborious to do 😅
