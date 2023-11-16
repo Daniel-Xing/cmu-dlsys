@@ -174,6 +174,7 @@ class Reshape(TensorOp):
     def compute(self, a):
         if self.shape is None:
             return a
+        print(f"把{a.shape}reshape成{self.shape}")
         return array_api.reshape(a, self.shape)
 
     def gradient(self, out_grad, node):
@@ -232,27 +233,16 @@ class Summation(TensorOp):
         return array_api.sum(a, axis=self.axes)
 
     def gradient(self, out_grad, node):
-        input_value = node.inputs[0]  # The input to the sum operation.
-        
-        # If the summation was over certain axes, we need to broadcast
-        # the gradient so that it matches the shape of the input tensor.
+        input_value = node.inputs[0]
+
         if self.axes is not None:
-            # We create a shape with 1s for the summed axes and the original
-            # dimensions for the others.
-            output_shape = []
-            for axis, size in enumerate(input_value.shape):
-                if axis in self.axes:
-                    output_shape.append(1)
-                else:
-                    output_shape.append(size)
-            
-            # We then need to broadcast 'out_grad' to this shape.
-            grad = array_api.broadcast_to(Reshape(output_shape).compute(out_grad.cached_data), input_value.shape)
+            output_shape = [1 if axis in self.axes else size for axis, size in enumerate(input_value.shape)]
+            grad = array_api.broadcast_to(array_api.reshape(out_grad.cached_data, output_shape), input_value.shape)
         else:
-            # If we summed over all axes, the gradient is just a tensor of the
-            # same shape as the input filled with the value of 'out_grad'.
-            grad = array_api.full_like(input_value, out_grad.cached_data)
-        
+            # 创建一个与input_value形状相同的张量，每个元素都是out_grad
+            grad = array_api.full(input_value.shape, out_grad.cached_data)
+
+        print(f"Summation: 输入梯度是{out_grad}, 输出梯度是{grad}, 输入是{input_value}")
         return Tensor(grad)
 
 
@@ -264,7 +254,14 @@ def summation(a, axes=None):
 
 class MatMul(TensorOp):
     def compute(self, a, b):
-        return array_api.matmul(a, b)
+        # 检查a和b是否为标量，如果是，则使用标量乘法
+        if isinstance(a, (float, int)) and not isinstance(b, (float, int)):
+            return array_api.multiply(a, b)
+        elif isinstance(b, (float, int)) and not isinstance(a, (float, int)):
+            return array_api.multiply(b, a)
+        else:
+            # 否则执行矩阵乘法
+            return array_api.matmul(a, b)
 
     @staticmethod
     def match_shape(grad, original_shape):
@@ -287,13 +284,17 @@ class MatMul(TensorOp):
         a, b = node.inputs
 
         # Compute gradient for a
+        print(f"原始的out_grad.cached_data的shape{out_grad.cached_data}, b的shape{b.cached_data.shape}")
         grad_a = self.compute(out_grad.cached_data, transpose(b).cached_data)
+        print(f"原始的grad_a的shape{grad_a.shape}, a的shape{a.shape}")
         grad_a = self.match_shape(grad_a, a.shape)
+        print(f"改造后的grad_a的shape{grad_a.shape}, a的shape{a.shape}")
 
         # Compute gradient for b
         grad_b = self.compute(transpose(a).cached_data, out_grad.cached_data)
+        print(f"原始的grad_b的shape{grad_b.shape}, b的shape{b.shape}")
         grad_b = self.match_shape(grad_b, b.shape)
-
+        print(f"改造后的grad_b的shape{grad_b.shape}, b的shape{b.shape}")
         return Tensor(grad_a), Tensor(grad_b)
 
 
