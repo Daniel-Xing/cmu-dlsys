@@ -1,6 +1,6 @@
 # 深度学习系统从入门到放弃 - CMU-DL System Lab1-1 前向计算和梯度传播
 
-lab1的第二期来啦，话不多说直接上题解
+大家好我是打螺丝时长一年的KK大魔王。今天带来的是lab1的第二期题解，话不多说直接开始。
 
 # 问题3 - 拓扑排序
 
@@ -78,25 +78,25 @@ def compute_gradient_of_variables(output_tensor, out_grad):
         # Initialize node gradient list if not present
         if node_i not in node_to_output_grads_list:
             node_to_output_grads_list[node_i] = []
-    
+  
         # Sum gradients for node_i
         grad_sum = sum(node_to_output_grads_list[node_i])
         print(f"当前处理的节点, {node_i.cached_data.shape}, 当前梯度为 {grad_sum}")
-    
+  
         # Store the computed result in the grad field of each Variable
         if isinstance(node_i, Value):
             node_i.grad = grad_sum
-        
+  
         if node_i.op is None:
             continue
-    
+  
         # print(f"当前节点的操作 {type(node_i.op)}")
         # for input in node_i.inputs:
         #     print(f"当前节点的输入是{input.cached_data.shape}")
-    
+  
         v_ks = node_i.op.gradient(out_grad=grad_sum, node=node_i)
         # Debugging information to understand the dimensionality and type of the gradients.
-    
+  
         if not isinstance(v_ks, tuple):
             v_ks = (v_ks,)
 
@@ -116,3 +116,126 @@ def compute_gradient_of_variables(output_tensor, out_grad):
     # but the return statement could be removed if that's not needed.
     return node_to_output_grads_list
 ```
+
+# 问题5 - Softmax 损失
+
+首先我们需要将lab0中的 `parse_mnist` 拷贝过来，然后我们需要重新实现这个softmax_loss()函数
+
+```python
+def softmax_loss(Z, y_one_hot):
+    """Return softmax loss.  Note that for the purposes of this assignment,
+    you don't need to worry about "nicely" scaling the numerical properties
+    of the log-sum-exp computation, but can just compute this directly.
+
+    Args:
+        Z (ndl.Tensor[np.float32]): 2D Tensor of shape
+            (batch_size, num_classes), containing the logit predictions for
+            each class.
+        y (ndl.Tensor[np.int8]): 2D Tensor of shape (batch_size, num_classes)
+            containing a 1 at the index of the true label of each example and
+            zeros elsewhere.
+
+    Returns:
+        Average softmax loss over the sample. (ndl.Tensor[np.float32])
+    """
+    # 计算 softmax 的每个元素的指数
+    exp_Z = ndl.Exp()(Z)
+
+    # 计算 softmax 分母部分：对每行的所有指数求和
+    sum_exp_Z = ndl.Summation(axes=(1,))(exp_Z)
+
+    # 计算 softmax 分子部分：获取每个样本的真实类别的 logits 的指数
+    # 使用 y_one_hot 作为掩码选择每行的真实类别对应的元素
+    correct_logit_exp = ndl.Summation(axes=(1,))(exp_Z * y_one_hot)
+
+    # 计算损失：对于每个样本，计算 -log(分子/分母)
+    # 也就是 -log(correct_logit_exp / sum_exp_Z)
+    softmax_loss_per_sample = -ndl.Log()(correct_logit_exp / sum_exp_Z)
+
+    # 计算平均损失
+    average_loss = ndl.Summation()(softmax_loss_per_sample) / Z.shape[0]
+
+    return average_loss
+
+```
+
+# 问题6 - 两层神经网络的随机梯度下降
+
+这个问题要求我们重新是先SGD算法，注意在Lab0中直接给出了梯度更新公式，但是在这里我们需要使用backward方法反向传播梯度。另外，我们需要实现Relu操作符。
+
+```python
+
+class ReLU(TensorOp):
+    def compute(self, a):
+        return array_api.maximum(0, a.data)
+
+    def gradient(self, out_grad, node):
+        input_value = node.inputs[0].cached_data  # 获取输入值
+
+        # 创建梯度掩码，输入值大于 0 的位置为 1，其他位置为 0
+        grad_mask = array_api.where(input_value > 0, 1, 0)
+
+        # 将传入的梯度与掩码相乘
+        return out_grad * grad_mask
+
+def nn_epoch(X, y, W1, W2, lr=0.1, batch=100):
+    """Run a single epoch of SGD for a two-layer neural network defined by the
+    weights W1 and W2 (with no bias terms):
+        logits = ReLU(X * W1) * W1
+    The function should use the step size lr, and the specified batch size (and
+    again, without randomizing the order of X).
+
+    Args:
+        X (np.ndarray[np.float32]): 2D input array of size
+            (num_examples x input_dim).
+        y (np.ndarray[np.uint8]): 1D class label array of size (num_examples,)
+        W1 (ndl.Tensor[np.float32]): 2D array of first layer weights, of shape
+            (input_dim, hidden_dim)
+        W2 (ndl.Tensor[np.float32]): 2D array of second layer weights, of shape
+            (hidden_dim, num_classes)
+        lr (float): step size (learning rate) for SGD
+        batch (int): size of SGD mini-batch
+
+    Returns:
+        Tuple: (W1, W2)
+            W1: ndl.Tensor[np.float32]
+            W2: ndl.Tensor[np.float32]
+    """
+    num_examples = X.shape[0]
+    num_classes = W2.shape[1]
+  
+    # Convert y to one-hot encoding
+    y_one_hot = np.eye(num_classes)[y]
+  
+    for start_idx in range(0, num_examples, batch):
+        end_idx = min(start_idx + batch, num_examples)
+        X_batch = ndl.Tensor(X[start_idx:end_idx])
+        y_batch = ndl.Tensor(y_one_hot[start_idx:end_idx])
+  
+        Z1 = ndl.relu(X_batch @ W1)  # Activation from first layer
+        logits = Z1 @ W2  # Logits for the current batch
+        # Compute softmax loss
+        loss = softmax_loss(logits, y_batch)
+
+        # Backward pass
+        loss.backward()
+
+        # Update weights
+        W1 = ndl.Tensor(W1.data - lr * W1.grad.data)
+        W2 = ndl.Tensor(W2.data - lr * W2.grad.data)
+
+        # Clear gradients
+        W1.grad = None
+        W2.grad = None
+    return W1, W2
+```
+
+# 总结
+
+至此我们完成了Lab1的所有任务，可以说一个雏形自动微分框架已经形成了。
+
+- 我们实现了多个算子的前向和反向计算
+- 我们也利用拓扑排序，构建了反向计算图
+- 最后我们基于上述代码实现了softmax-loss和sgd算法
+
+感觉有些渐入佳境了，让我们Lab2再见

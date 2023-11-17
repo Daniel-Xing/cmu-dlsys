@@ -337,9 +337,9 @@ class Exp(TensorOp):
         return array_api.exp(a)
 
     def gradient(self, out_grad, node):
-        ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
-        ### END YOUR SOLUTION
+        input_value = node.inputs[0]
+        
+        return out_grad * self.compute(input_value.cached_data)
 
 
 def exp(a):
@@ -351,9 +351,13 @@ class ReLU(TensorOp):
         return array_api.maximum(0, a.data)
 
     def gradient(self, out_grad, node):
-        ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
-        ### END YOUR SOLUTION
+        input_value = node.inputs[0].cached_data  # 获取输入值
+
+        # 创建梯度掩码，输入值大于 0 的位置为 1，其他位置为 0
+        grad_mask = array_api.where(input_value > 0, 1, 0)
+
+        # 将传入的梯度与掩码相乘
+        return out_grad * grad_mask
 
 
 def relu(a):
