@@ -13,10 +13,9 @@ TENSOR_COUNTER = 0
 
 # NOTE: we will import numpy as the array_api
 # as the backend for our computations, this line will change in later homeworks
-
 import numpy as array_api
-NDArray = numpy.ndarray
 
+NDArray = numpy.ndarray
 
 
 class Op:
@@ -380,9 +379,48 @@ def compute_gradient_of_variables(output_tensor, out_grad):
     # Traverse graph in reverse topological order given the output_node that we are taking gradient wrt.
     reverse_topo_order = list(reversed(find_topo_sort([output_tensor])))
 
-    ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
-    ### END YOUR SOLUTION
+    for node_i in reverse_topo_order:
+        # Initialize node gradient list if not present
+        if node_i not in node_to_output_grads_list:
+            node_to_output_grads_list[node_i] = []
+        
+        # Sum gradients for node_i
+        grad_sum = sum(node_to_output_grads_list[node_i])
+        print(f"当前处理的节点, {node_i.cached_data.shape}, 当前梯度为 {grad_sum}")
+        
+        # Store the computed result in the grad field of each Variable
+        if isinstance(node_i, Value):
+            node_i.grad = grad_sum
+            
+        if node_i.op is None:
+            continue
+        
+        # print(f"当前节点的操作 {type(node_i.op)}")
+        # for input in node_i.inputs:
+        #     print(f"当前节点的输入是{input.cached_data.shape}")
+        
+        v_ks = node_i.op.gradient(out_grad=grad_sum, node=node_i)
+        # Debugging information to understand the dimensionality and type of the gradients.
+        
+        if not isinstance(v_ks, tuple):
+            v_ks = (v_ks,)
+
+        # Propagate gradients to inputs
+        for i in range(len(node_i.inputs)):
+            k = node_i.inputs[i]
+            # Initialize input node gradient list if not present
+            if k not in node_to_output_grads_list:
+                node_to_output_grads_list[k] = []
+            try:  
+                print(f"梯度维度{v_ks[i].cached_data.shape}, 输入维度{k.cached_data.shape}")
+            except:
+                print(f"梯度维度{v_ks[i].cached_data}")
+            node_to_output_grads_list[k].append(v_ks[i])
+
+    # The function seems to require storing the gradients in the nodes
+    # but the return statement could be removed if that's not needed.
+    return node_to_output_grads_list
+            
 
 
 def find_topo_sort(node_list: List[Value]) -> List[Value]:
@@ -393,16 +431,30 @@ def find_topo_sort(node_list: List[Value]) -> List[Value]:
     after all its predecessors are traversed due to post-order DFS, we get a topological
     sort.
     """
-    ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
-    ### END YOUR SOLUTION
+    visited = set()  # 用于跟踪已访问的节点
+    topo_order = []  # 用于存储拓扑排序的结果
+
+    # 遍历每个节点，并执行DFS
+    for node in node_list:
+        if node not in visited:
+            topo_sort_dfs(node, visited, topo_order)
+
+    return topo_order
 
 
-def topo_sort_dfs(node, visited, topo_order):
+def topo_sort_dfs(node: Value, visited, topo_order):
     """Post-order DFS"""
-    ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
-    ### END YOUR SOLUTION
+    if node in visited:
+        return
+    
+    visited.add(node)  # 标记当前节点为已访问
+
+    if node.inputs:
+        for input_node in node.inputs:
+            topo_sort_dfs(input_node, visited, topo_order)
+
+    topo_order.append(node)  # 在处理完所有输入后，将节点加入排序列表
+
 
 
 ##############################
